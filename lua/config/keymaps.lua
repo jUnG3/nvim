@@ -71,6 +71,10 @@ if tb_ok then
   -- Extra "VSCode-style" symbol search
   map("n", "<leader>ps", tb.lsp_workspace_symbols, { desc = "Project symbols" })
   map("n", "<leader>fs", tb.lsp_document_symbols, { desc = "File symbols" })
+  -- Somewhere in your keymaps/init.lua
+  vim.keymap.set("n", "<leader>c", function()
+    require("config.gradle_telescope").pick_gradle_tasks()
+  end, { desc = "Gradle: pick and run tasks" })
 
 end
 
