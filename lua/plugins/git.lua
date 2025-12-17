@@ -61,4 +61,16 @@ return {
       })
     end,
   },
+  {
+    "akinsho/git-conflict.nvim",
+    version = "*",
+    config = function()
+      require("git-conflict").setup({
+        default_mappings = true,  -- co/ct/cb/c0 and ]x/[x
+      -- You can add options like:
+      -- disable_diagnostics = true,
+      -- highlights = { incoming = "DiffText", current = "DiffAdd" },
+      })
+    end,
+  }
 }

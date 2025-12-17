@@ -1,3 +1,4 @@
+local telescope_meson = require "config.meson_telescope"
 -- lua/config/keymaps.lua
 
 local map = vim.keymap.set
@@ -68,34 +69,34 @@ if tb_ok then
   -- Extra LSP helpers
   map("n", "<leader>ds", tb.lsp_document_symbols,  { desc = "Document symbols" })
   map("n", "<leader>ws", tb.lsp_workspace_symbols, { desc = "Workspace symbols" })
-  -- Extra "VSCode-style" symbol search
-  map("n", "<leader>ps", tb.lsp_workspace_symbols, { desc = "Project symbols" })
-  map("n", "<leader>fs", tb.lsp_document_symbols, { desc = "File symbols" })
-  -- Somewhere in your keymaps/init.lua
-  vim.keymap.set("n", "<leader>c", function()
+  map("n", "<leader>xr", function()
+    tb.lsp_references({})
+  end, { desc = "Telescope: LSP references" })
+ 
+  -- Gradle list all tasks
+  vim.keymap.set("n", "<leader>cgt", function()
     require("config.gradle_telescope").pick_gradle_tasks()
   end, { desc = "Gradle: pick and run tasks" })
+  
+  -- Buffers
+  map("n", "<leader>bb", function()
+    tb.buffers({ sort_mru = true, show_all_buffers = true })
+  end, { desc = "Telescope: list buffers" })
+
+  -- workspace (project) diagnostics
+  map("n", "<leader>wx", function()
+    tb.diagnostics({})
+  end, { desc = "Telescope: workspace diagnostics" })
+
+  -- current file (buffer) diagnostics
+  map("n", "<leader>dx", function()
+    tb.diagnostics({ bufnr = 0 })
+  end, { desc = "Telescope: buffer diagnostics" })
+
+  -- Meson list compile targets
+  map("n", "<leader>cmt", telescope_meson.open_meson_picker, { desc = "Telescope: Meson (pick build dir + action)" })
 
 end
-
-------------------------------------------------------------
--- 6. Trouble (diagnostics & symbols)
-------------------------------------------------------------
-map("n", "<leader>xx", function()
-  require("trouble").toggle("diagnostics")
-end, { desc = "Trouble: toggle diagnostics" })
-
-map("n", "<leader>xw", function()
-  require("trouble").toggle("workspace_diagnostics")
-end, { desc = "Trouble: workspace diagnostics" })
-
-map("n", "<leader>xs", function()
-  require("trouble").toggle("symbols")
-end, { desc = "Trouble: document symbols" })
-
-map("n", "<leader>xr", function()
-  require("trouble").toggle("lsp_references")
-end, { desc = "Trouble: LSP references" })
 
 ------------------------------------------------------------
 -- 7. LSP extras
