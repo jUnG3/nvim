@@ -48,8 +48,12 @@ function M.setup_java_lsp()
 
   local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
+  local lombok = vim.fn.stdpath("data")
+    .. "/mason/packages/jdtls/lombok.jar"
+
   local cmd = {
     "java",
+    "-javaagent:" .. lombok,
     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
     "-Dosgi.bundles.defaultStartLevel=4",
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
