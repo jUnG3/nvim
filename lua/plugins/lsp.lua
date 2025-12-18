@@ -39,6 +39,7 @@ return {
 
       -- Enable clangd (will start when you open C/C++ buffers)
       vim.lsp.enable("clangd")
+      pcall(vim.lsp.disable, "disable")
 
       -- Diagnostics styling
       vim.diagnostic.config({

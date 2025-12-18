@@ -12,6 +12,9 @@ local function get_jdtls()
 end
 
 function M.setup_java_lsp()
+  if vim.b.jdtls_started then return end
+  vim.b.jdtls_started = true
+
   local jdtls = get_jdtls()
   if not jdtls then
     return
@@ -114,13 +117,5 @@ function M.setup_java_lsp()
     jdtls.extract_method(true)
   end, "Java: extract method")
 end
-
--- Autocmd to start jdtls for Java files
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "java",
-  callback = function()
-    M.setup_java_lsp()
-  end,
-})
 
 return M
