@@ -1,66 +1,53 @@
 -- lua/plugins/lsp.lua
-
 return {
   ---------------------------------------------------------------------------
-  -- LSP core (clangd via new vim.lsp.config API)
+  -- LSP core (clangd via NEW vim.lsp.config API ONLY)
+  -- IMPORTANT:
+  --   - Do NOT include neovim/nvim-lspconfig or mason-lspconfig here, or they
+  --     may start clangd with default cmd={ "clangd" } and override your flags.
   ---------------------------------------------------------------------------
   {
-    "neovim/nvim-lspconfig",
-    dependencies = {
-      "williamboman/mason.nvim",
-      "williamboman/mason-lspconfig.nvim",
-      "hrsh7th/cmp-nvim-lsp",
-    },
-    config = function()
-      -- Mason: install servers
-      require("mason").setup()
+  "hrsh7th/cmp-nvim-lsp",
+  event = { "BufReadPre", "BufNewFile" },
+  config = function()
+    local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      local mason_lspconfig = require("mason-lspconfig")
-      mason_lspconfig.setup({
-        ensure_installed = { "clangd" },
-        automatic_installation = true,
-      })
+    vim.lsp.config("clangd", {
+      cmd = {
+        "clangd",
+        "--background-index",
+        "--clang-tidy",
+        "--fallback-style=llvm",
+        "--completion-style=detailed",
+        "--header-insertion=iwyu",
+        "--query-driver=**/ccache,**/g++,**/c++,/run/current-system/sw/bin/*,/nix/store/*/bin/*",
+      },
+      capabilities = capabilities,
+      single_file_support = false,
+    })
 
-      -- Capabilities for completion (shared with Java jdtls)
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
-      -- New-style config: no require("lspconfig") here
-      vim.lsp.config("clangd", {
-        cmd = {
-          "clangd",
-          "--background-index",
-          "--clang-tidy",
-          "--completion-style=detailed",
-          "--header-insertion=never",
-          "--fallback-style=llvm",
-        },
-        capabilities = capabilities,
-      })
-
-      -- Enable clangd (will start when you open C/C++ buffers)
-      vim.lsp.enable("clangd")
-      pcall(vim.lsp.disable, "disable")
-
-      -- Diagnostics styling
+    vim.lsp.enable("clangd")
+       -- Diagnostics styling
       vim.diagnostic.config({
         signs = {
           priority = 20,
           text = {
             [vim.diagnostic.severity.ERROR] = "",
-            [vim.diagnostic.severity.WARN]  = "",
-            [vim.diagnostic.severity.HINT]  = "",
-            [vim.diagnostic.severity.INFO]  = "",
+            [vim.diagnostic.severity.WARN] = "",
+            [vim.diagnostic.severity.HINT] = "",
+            [vim.diagnostic.severity.INFO] = "",
           },
         },
       })
-    end,
-  },
+  end,
+},
 
   ---------------------------------------------------------------------------
   -- Completion: nvim-cmp + LuaSnip
   ---------------------------------------------------------------------------
   {
     "hrsh7th/nvim-cmp",
+    event = "InsertEnter",
     dependencies = {
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-buffer",
@@ -83,10 +70,10 @@ return {
         },
         mapping = cmp.mapping.preset.insert({
           ["<C-Space>"] = cmp.mapping.complete(),
-          ["<CR>"]      = cmp.mapping.confirm({ select = true }),
-          ["<C-j>"]     = cmp.mapping.select_next_item(),
-          ["<C-k>"]     = cmp.mapping.select_prev_item(),
-          ["<C-e>"]     = cmp.mapping.abort(),
+          ["<CR>"] = cmp.mapping.confirm({ select = true }),
+          ["<C-j>"] = cmp.mapping.select_next_item(),
+          ["<C-k>"] = cmp.mapping.select_prev_item(),
+          ["<C-e>"] = cmp.mapping.abort(),
         }),
         sources = cmp.config.sources({
           { name = "nvim_lsp" },
@@ -99,32 +86,22 @@ return {
   },
 
   ---------------------------------------------------------------------------
-  -- Formatting: Conform (clang-format + Java via LSP)
+  -- Formatting: Conform (clang-format)
   ---------------------------------------------------------------------------
   {
     "stevearc/conform.nvim",
     config = function()
       require("conform").setup({
         formatters_by_ft = {
-          c   = { "clang_format" },
+          c = { "clang_format" },
           cpp = { "clang_format" },
-          -- java: formatting via jdtls (LSP), so no external formatter here
         },
         format_on_save = function(bufnr)
           local ft = vim.bo[bufnr].filetype
-
           if ft == "c" or ft == "cpp" then
             return {
               timeout_ms = 1000,
               lsp_fallback = false,
-              async = false,
-            }
-          end
-
-          if ft == "java" then
-            return {
-              timeout_ms = 2000,
-              lsp_fallback = true, -- use jdtls
               async = false,
             }
           end
@@ -144,3 +121,4 @@ return {
     end,
   },
 }
+

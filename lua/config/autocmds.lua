@@ -30,3 +30,11 @@ vim.api.nvim_create_autocmd("InsertEnter", {
     pcall(vim.lsp.buf.signature_help)
   end,
 })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "c", "cpp", "objc", "objcpp" },
+  callback = function()
+    vim.lsp.enable("clangd")
+  end,
+})
+
