@@ -26,7 +26,6 @@ return {
       single_file_support = false,
     })
 
-    vim.lsp.enable("clangd")
        -- Diagnostics styling
       vim.diagnostic.config({
         signs = {
