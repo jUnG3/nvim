@@ -13,7 +13,7 @@ return {
             validate = true,
             hover = true,
             completion = true,
-
+		filetypes = { "yaml", "yml" },
             -- Pull lots of common schemas automatically
             schemaStore = {
               enable = true,
