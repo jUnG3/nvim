@@ -9,12 +9,6 @@ return {
     },
     event = { "BufReadPre", "BufNewFile" },
     config = function()
-      local java_home = "/nix/store/65qpdkc33j5wqzxvz8c23zhgms8hl35y-openjdk-21.0.9+10/lib/openjdk"
-
-      -- make sure `java` resolves to the nix one
-      vim.env.JAVA_HOME = java_home
-      vim.env.PATH = java_home .. "/bin:" .. (vim.env.PATH or "")
-
       -- Lombok agent
       local lombok = vim.fn.stdpath("data") .. "/mason/packages/jdtls/lombok.jar"
       if vim.fn.filereadable(lombok) == 1 then
@@ -31,7 +25,15 @@ return {
         },
       })
 
+      vim.lsp.config("jdtls", {
+				filetypes = { "java" },
+			})
+      vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "java" },
+    callback = function()
       vim.lsp.enable("jdtls")
+    end,
+  })
     end,
   },
 }
