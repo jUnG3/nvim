@@ -22,6 +22,7 @@ return {
         "--header-insertion=iwyu",
         "--query-driver=**/ccache,**/g++,**/c++,/run/current-system/sw/bin/*,/nix/store/*/bin/*",
       },
+      filetypes = { "c", "cpp", "objc", "objcpp" },
       capabilities = capabilities,
       single_file_support = false,
     })
