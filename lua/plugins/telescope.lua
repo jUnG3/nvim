@@ -23,6 +23,26 @@ return {
               ["t"] = actions.select_tab,
             },
           },
+	  vimgrep_arguments = {
+            "rg",
+            "--color=never",
+            "--no-heading",
+            "--with-filename",
+            "--line-number",
+            "--column",
+            "--smart-case",
+            "--hidden",         -- include dotfiles
+            "--glob", "!.git/", -- but keep .git excluded
+          },
+        },
+	pickers = {
+          find_files = {
+            hidden = true,          -- show dotfiles
+            no_ignore = treu,      -- set true if you want to ignore .gitignore
+            no_ignore_parent = false,
+            -- Alternatively use fd (faster) if installed:
+            -- find_command = { "fd", "--type", "f", "--hidden", "--follow", "--exclude", ".git" },
+          },
         },
       })
     end,
