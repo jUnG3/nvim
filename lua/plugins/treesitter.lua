@@ -1,15 +1,20 @@
 -- lua/plugins/treesitter.lua
-
 return {
+  -- Core Treesitter
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter-textobjects",
-    },
+    event = { "BufReadPost", "BufNewFile" }, -- defer load
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = { "c", "cpp", "lua", "vim", "vimdoc", "query", "java" },
+      local ok, configs = pcall(require, "nvim-treesitter.configs")
+      if not ok then
+        vim.schedule(function()
+          vim.notify("[treesitter] nvim-treesitter not available yet", vim.log.levels.WARN)
+        end)
+        return
+      end
+      configs.setup({
+        ensure_installed = { "c", "cpp", "lua", "vim", "vimdoc", "query", "java", "python" },
         highlight = { enable = true },
         indent    = { enable = true },
         incremental_selection = {
@@ -21,6 +26,7 @@ return {
             node_decremental  = "gnd",
           },
         },
+        -- You can keep textobjects config here; the module will apply once the extension loads
         textobjects = {
           move = {
             enable = true,
@@ -48,6 +54,16 @@ return {
           },
         },
       })
+    end,
+  },
+
+  -- Treesitter Textobjects (load only after core is present)
+  {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    event = { "BufReadPost", "BufNewFile" },                 -- lazy-load
+    dependencies = { "nvim-treesitter/nvim-treesitter" },    -- ensure order
+    cond = function()                                        -- belt-and-suspenders
+      return package.loaded["nvim-treesitter.configs"] ~= nil
     end,
   },
 }
