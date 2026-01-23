@@ -113,6 +113,12 @@ map("n", "<leader>f", function()
   require("conform").format({ async = true })
 end, { desc = "Format buffer" })
 
+local vt_enabled = true
+vim.keymap.set("n", "<leader>tv", function()
+  vt_enabled = not vt_enabled
+  vim.diagnostic.config({ virtual_text = vt_enabled })
+  vim.notify("Inline diagnostics: " .. (vt_enabled and "on" or "off"))
+end, { desc = "Toggle inline diagnostics" })
 ------------------------------------------------------------
 -- 8. DAP (debugger) keymaps
 ------------------------------------------------------------

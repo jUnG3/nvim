@@ -39,6 +39,24 @@ return {
           },
         },
       })
+    -- Inline (virtual text) diagnostics next to the line
+vim.diagnostic.config({
+  virtual_text = {
+    spacing = 2,            -- extra padding from the text
+    prefix = "●",           -- or "▎", "", "", etc.
+    source = "if_many",     -- show source if multiple
+    severity_sort = true,
+    -- Optionally reduce noise: only show warnings+errors inline
+    -- severity = { min = vim.diagnostic.severity.WARN },
+    format = function(d)
+      return d.message
+    end,
+  },
+  signs = true,
+  underline = true,
+  update_in_insert = false,
+  severity_sort = true,
+})
   end,
 },
 
