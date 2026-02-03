@@ -1,7 +1,7 @@
--- lua/plugins/python.lua
 return {
   {
-    "neovim/nvim-lspconfig",         -- ensure this is installed so config runs
+    -- Use a plugin “carrier” so Lazy runs this config; lspconfig is not required
+    "nvim-lua/plenary.nvim",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
@@ -9,36 +9,28 @@ return {
       local function is_win()
         return vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
       end
-      local function dirname(p) return vim.fs.dirname(p) end
 
-      local function project_root(start)
-        local patterns = {
-          "pyproject.toml",
-          "setup.cfg",
-          "setup.py",
-          "requirements.txt",
-          "Pipfile",
-          ".git",
-          ".venv",
-        }
-        local here = start or vim.api.nvim_buf_get_name(0)
-        local found = vim.fs.find(patterns, { path = here, upward = true })[1]
-        return found and dirname(found) or vim.loop.cwd()
+      local function project_root(bufnr)
+        local fname = vim.api.nvim_buf_get_name(bufnr)
+        local found = vim.fs.find(
+          { ".venv", "pyproject.toml", "setup.cfg", "setup.py", "requirements.txt", "Pipfile", ".git" },
+          { path = fname, upward = true }
+        )[1]
+        local dir = found and vim.fs.dirname(found) or vim.loop.cwd()
+        return dir
       end
 
       local function venv_bin(root)
-        local sep = package.config:sub(1, 1)
+        local sep = package.config:sub(1,1)
         local venv = root .. sep .. ".venv"
-        local bin = is_win() and (venv .. sep .. "Scripts" .. sep) or (venv .. sep .. "bin" .. sep)
+        local bin  = is_win() and (venv .. sep .. "Scripts" .. sep) or (venv .. sep .. "bin" .. sep)
         return venv, bin
       end
 
-      local function exe(path)
-        return vim.fn.executable(path) == 1 and path or nil
-      end
+      local function exe(path) return vim.fn.executable(path) == 1 and path or nil end
 
-      local function start_python_ls(bufnr)
-        local root = project_root(vim.api.nvim_buf_get_name(bufnr))
+      local function start_python(bufnr)
+        local root = project_root(bufnr)
         local venv, bin = venv_bin(root)
 
         local pyright = exe(bin .. "pyright-langserver")
@@ -46,6 +38,7 @@ return {
         local ruff    = exe(bin .. "ruff-lsp")
 
         if pyright then
+          vim.notify(string.format("[Python] Starting pyright from %s", bin))
           vim.lsp.start({
             name = "pyright",
             cmd = { pyright, "--stdio" },
@@ -54,6 +47,7 @@ return {
             filetypes = { "python" },
           })
         elseif pylsp then
+          vim.notify(string.format("[Python] Starting pylsp from %s", bin))
           vim.lsp.start({
             name = "pylsp",
             cmd = { pylsp },
@@ -73,9 +67,7 @@ return {
             },
           })
         else
-          vim.schedule(function()
-            vim.notify(("[Python] No pyright or pylsp found in %s\nExpected in: %s"):format(root, venv), vim.log.levels.WARN)
-          end)
+          vim.notify(string.format("[Python] No server in .venv at %s. Install pyright or pylsp there.", venv), vim.log.levels.WARN)
         end
 
         if ruff then
@@ -91,9 +83,7 @@ return {
 
       vim.api.nvim_create_autocmd("FileType", {
         pattern = { "python" },
-        callback = function(args)
-          start_python_ls(args.buf)
-        end,
+        callback = function(args) start_python(args.buf) end,
       })
     end,
   },

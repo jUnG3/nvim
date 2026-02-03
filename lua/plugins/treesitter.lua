@@ -51,9 +51,4 @@ return {
   },
 
   -- Textobjects: load only after a file is opened; ensure core is present
-  {
-    "nvim-treesitter/nvim-treesitter-textobjects",
-    event = "BufReadPost",
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
-  },
 }
